@@ -65,7 +65,7 @@ public class Consumer {
                 }
                 public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
                     System.out.printf("%s topic-partitions are assigned to this consumer\n", Arrays.toString(partitions.toArray()));
-                    Iterator<TopicPartition> topicPartitionIterator = partitions.iterator();
+                    /*Iterator<TopicPartition> topicPartitionIterator = partitions.iterator();
                     while(topicPartitionIterator.hasNext()){
                         TopicPartition topicPartition = topicPartitionIterator.next();
                         System.out.println("Current offset is " + kafkaConsumer.position(topicPartition) + " committed offset is ->" + kafkaConsumer.committed(topicPartition) );
@@ -74,7 +74,7 @@ public class Consumer {
                         }else if(startingOffset ==0){
                             System.out.println("Setting offset to begining");
 
-                            kafkaConsumer.seekToBeginning(topicPartition);
+                            kafkaConsumer.seek(topicPartition);
                         }else if(startingOffset == -1){
                             System.out.println("Setting it to the end ");
 
@@ -83,7 +83,28 @@ public class Consumer {
                             System.out.println("Resetting offset to " + startingOffset);
                             kafkaConsumer.seek(topicPartition, startingOffset);
                         }
+                    }*/
+                    
+                    if(startingOffset == -2) {
+                        System.out.println("Leaving it alone");
+                    }else if(startingOffset ==0){
+                        System.out.println("Setting offset to begining");
+
+                        kafkaConsumer.seekToBeginning(partitions);
+                    }else if(startingOffset == -1){
+                        System.out.println("Setting it to the end ");
+
+                        kafkaConsumer.seekToEnd(partitions);
+                    }else {
+                        System.out.println("Resetting offset to " + startingOffset);
+                        Iterator<TopicPartition> topicPartitionIterator = partitions.iterator();
+                        while(topicPartitionIterator.hasNext()){
+                            TopicPartition topicPartition = topicPartitionIterator.next();
+                            kafkaConsumer.seek(topicPartition, startingOffset);
+                        }
+                        
                     }
+                    
                 }
             });
             //Start processing messages

@@ -1,14 +1,15 @@
 package com.spnotes.kafka.simple;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
+import java.util.Scanner;
+
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.errors.WakeupException;
-
-import java.util.Arrays;
-import java.util.Properties;
-import java.util.Scanner;
 
 /**
  * Created by sunilpatil on 12/28/15.
@@ -25,8 +26,11 @@ public class Consumer {
         in = new Scanner(System.in);
         String topicName = argv[0];
         String groupId = argv[1];
+        
+        String[] topics = topicName.split(",");
+        List<String> topicList = Arrays.asList(topics);
 
-        ConsumerThread consumerRunnable = new ConsumerThread(topicName,groupId);
+        ConsumerThread consumerRunnable = new ConsumerThread(topicList,groupId);
         consumerRunnable.start();
         String line = "";
         while (!line.equals("exit")) {
@@ -38,14 +42,15 @@ public class Consumer {
     }
 
     private static class ConsumerThread extends Thread{
-        private String topicName;
+        private List<String> topicName;
         private String groupId;
         private KafkaConsumer<String,String> kafkaConsumer;
 
-        public ConsumerThread(String topicName, String groupId){
+        public ConsumerThread(List<String> topicName, String groupId){
             this.topicName = topicName;
             this.groupId = groupId;
         }
+        
         public void run() {
             Properties configProperties = new Properties();
             configProperties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
@@ -56,7 +61,7 @@ public class Consumer {
 
             //Figure out where to start processing messages from
             kafkaConsumer = new KafkaConsumer<String, String>(configProperties);
-            kafkaConsumer.subscribe(Arrays.asList(topicName));
+            kafkaConsumer.subscribe(topicName);
             //Start processing messages
             try {
                 while (true) {
